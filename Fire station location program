@@ -1,0 +1,133 @@
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.text.DecimalFormat;
+
+public class Pro1_vedrines {
+
+	public static BufferedReader cin = new BufferedReader (new InputStreamReader ( System.in ) );
+
+	//Method for option 0: If user chooses the "Quit" option.
+	static void Quit_method() {
+		
+		System.out.println("\n" + "Goodbye!");
+	}
+	
+	//Method for option 1: If user chooses to convert feet and inches to cm.
+	static void inches2cm_method() throws NumberFormatException, IOException {
+		//declaring variables 
+		double feet;
+		double inches;
+		double cm;
+		
+		//reading user input
+		System.out.print("\n" + "Enter feet and inches: ");
+		feet = Double.parseDouble ( cin.readLine() ) ;
+		inches = Double.parseDouble ( cin.readLine() ) ;
+		
+		//Check if input for feet  is negative 
+		if (feet < 0)  {
+			System.out.println("ERROR: Negative numbers not allowed!");
+		}
+	
+		//Check if input for inches is negative 
+		else if (inches < 0) {
+			System.out.println("ERROR: Negative numbers not allowed!");
+		}
+			
+		else {
+			//calculation of conversion from inches to cm.
+			cm = inches*2.54 + 2.54*feet*12;
+			//formatting the output to 2 decimals 
+		////	DecimalFormat numberFormat = new DecimalFormat("#.00");
+			
+			//printing output
+			System.out.println(feet + " feet " + inches + " inches equals " + cm+ " centimeters.");			}
+			
+		}
+		
+	
+	
+
+	//Method for option 2: If user chooses to convert cm to feet and inches.
+	static void cm2inches_method() throws NumberFormatException, IOException {
+		//declaring variables 
+		double feet;
+		double inches;
+		double cm;
+		
+		System.out.print("\n" + "Enter centimeters: ");
+		
+		//reading the user input
+		cm = Double.parseDouble (cin.readLine()) ;	
+		
+		//Check if input is negative 
+		if (cm < 0) {
+			System.out.println("ERROR: Negative numbers not allowed!");
+	
+		}
+		
+		else {
+			//Calculating conversion from cm to inches.
+			inches = cm/2.54;
+			
+			//extracting the units of the inches
+			int y = (int)inches;
+			//calculating the number of feet within the inches.
+			feet = y/12;
+			//calculating the remaining inches after subtracting the number of feet to the total amount of inches
+			double remain_inches = inches - feet*12;
+			
+			//printing result
+			System.out.println(cm + " centimeters equals " + feet + " feet " + remain_inches + " inches.");
+		}
+	}
+		
+	
+	//Main function
+	public static void main(String[] args) throws NumberFormatException, IOException  {
+		
+		//infinite loop that can only be broken out of with option 0
+		while (true) {
+			
+		double option;
+	
+		System.out.print("   JAVA CONVERSION PROGRAM\n"
+				+ "0 - Quit\n"
+				+ "1 - Convert feet and inches to centimeters\n"
+				+ "2 - Convert centimeters to feet and inches\n" );
+		
+		
+		System.out.print( "\n"+ "Enter choice: " );
+		
+		
+		//read in user output 
+		option = Double.parseDouble ( cin.readLine() ) ;
+		
+		//calling option 0
+		if (option ==0) {
+			Quit_method();
+			break;
+		}
+		
+		//calling option 1
+		else if (option == 1) {
+			inches2cm_method();
+			System.out.print("\n");
+			
+		}
+		
+		//calling option 2
+		else if (option == 2) {
+			cm2inches_method();
+			System.out.print("\n"); 
+		}
+	
+		//If the user enters a non numerical input
+		else {
+			System.out.println("\n" + "ERROR: Invalid menu choice!" + "\n" );
+		
+		}
+		}
+ }
+}
