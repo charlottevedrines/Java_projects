@@ -1,0 +1,347 @@
+import java.util.Arrays;
+
+public class SteepestDescent {
+	private double eps ; // tolerance
+	private int maxIter ; // maximum number of iterations
+	private double stepSize ; // step size alpha
+	private double [] x0 ; // starting point
+	private double [] bestPoint ; // best point found
+	private double bestObjVal ; // best obj fn value found
+	private double bestGradNorm ; // best gradient norm found
+	private long compTime ; // computation time needed
+	private int nIter ; // no. of iterations needed
+	private boolean resultsExist ; // whether or not results exist
+	
+	
+	 // constructors
+	public SteepestDescent () {
+		eps = 0;
+		maxIter = 0;
+		stepSize = 0;
+		double x0[] = new double[0];
+	
+	}
+	public SteepestDescent ( double eps , int maxIter , double stepSize , double [] x0 ) {
+		this.eps = eps;
+		this.maxIter = maxIter;
+		this.stepSize = stepSize;
+		this.x0 = x0;
+	}
+	
+	// getters
+	public double getEps ()  {return this.eps;}
+	public int getMaxIter ()  {return this.maxIter;}
+	public double getStepSize ()  {return this.stepSize;}
+	public double [] getX0 ()  {return this.x0;}
+	public double getBestObjVal ()  {return this.bestObjVal;}
+	public double getBestGradNorm () {return this.bestGradNorm;}
+	public double [] getBestPoint () {return this.bestPoint;}
+	public int getNIter ()  {return this.nIter;} //didnt use this
+	public long getCompTime () {return this.compTime;} //or this
+	public boolean hasResults () {return this.resultsExist;} // or this
+	
+	// setters
+	public void setEps ( double a ) {this.eps = a;}
+	public void setMaxIter ( int a ) {this.maxIter = a;}
+	public void setStepSize ( double a ) {this.stepSize = a;}
+	public void setX0 ( int j , double a ) {this.x0[j] = a;}
+	public void setBestObjVal ( double a ) {this.bestObjVal = a;}
+	public void setBestGradNorm ( double a ) {this.bestGradNorm = a;}
+	public void setBestPoint ( double [] a ) {this.bestPoint = a;}
+	public void setCompTime ( long a ) {this.compTime = a;}
+	public void setNIter ( int a ) {this.nIter = a;}
+	public void setHasResults ( boolean a ) {this.resultsExist = a;}
+	
+	
+	// other methods
+	
+	// initialize member arrays to correct size
+	public void init ( int n ) {
+		this.x0 = new double[n];
+		this.bestPoint = new double[n]; 
+		 
+	}
+	
+	//Running Steepest Descent 
+	public void run ( Polynomial P ) {
+		//exit of the function in the case where no polynomial has been recorded
+		if (P.isSet () == false) {
+			return;
+		}
+		//start of the comp time
+		long start = System.currentTimeMillis();
+		
+		//Initialize variables and arrays
+		int i =0;
+		double norm = 0.0;
+		double f =0.0;
+		int j = 0;
+		double direction_array[] = new double[0];
+		double best_point[] = new double[0];
+		
+		//Initialization of steepest descent parameters in case they haven't been inputed 
+		if (hasResults () == false) {
+			init(P.getN());
+			setEps (0.001 );
+			setMaxIter ( 100 ) ;
+			setStepSize ( 0.05 );
+		
+			//Initialization of steepest descent parameter: starting point
+			for (j = 0; j < P.getN(); j++) {
+				setX0 (j , 1.00 );
+			}
+			
+			//Case where the number of variables inputed is above 1 therefore the predefined double 1.00 for the starting point
+			// is generalized and replicated an array of n size, now compatible with the polynomial
+			if (P.getN()!= 1 )	{
+				System.out.print( "\n");
+				System.out.print( "WARNING: Dimensions of polynomial and x0 do not match! Using x0 = 1-vector of appropriate dimension.");
+				System.out.print( "\n");
+			}
+			
+		}
+		
+		//print header
+		System.out.print("\n");
+		System.out.println("--------------------------------------------------------------\n"
+				+ "      f(x)   norm(grad)   # iter   Comp time (ms)   Best point   \n"
+				+ "--------------------------------------------------------------");
+		
+			
+		//Initializing the best point to the starting point (x0) 
+		setBestPoint(Arrays.copyOf(getX0 (), getX0 ().length));
+		best_point = Arrays.copyOf(getX0 (), getX0 ().length);
+
+		
+		//Loop with the first stopping criteria: the while loop will run until the maximum number of iterations is hit
+		while (i <= getMaxIter () ) {
+			
+			//Setting the iterator
+			setNIter (i);
+			
+			//Function f is calculated with the present best point
+			f = P.f(getBestPoint ());
+			//Printing the function
+			System.out.printf("%10.6f",  f );
+			//Setting the function value output
+			setBestObjVal(P.f(getBestPoint ()));
+			
+			//Norm is calculated 
+			norm = P.gradientNorm(getBestPoint());
+			//Setting the norm
+			setBestGradNorm(norm);
+			//Printing the norm
+			System.out.printf("%13.6f", norm);
+				
+			//Second stopping criteria, if the norm is smaller than epsilon, the while loop is broken out of 
+			if (norm <=  getEps ()) {
+				break;
+			}
+			
+			//Gradient calculated at the best point
+			direction_array = direction(P, getBestPoint());
+			
+			//Printing of the iterator 
+			System.out.printf("%9d",i);
+			i+=1;
+				
+			//End of comp time calculation
+			long elapsedTime = System.currentTimeMillis() - start;
+			//Setting comp time
+			setCompTime (elapsedTime );
+			//Printing comp time
+			System.out.printf("%17d",elapsedTime);
+			
+			//Calculation if the best point
+			for (j=0; j < getX0().length; j++ ) {
+				
+				//Formatting for the first best point output
+				if (j==0) {
+					System.out.print("   ");
+					System.out.printf("%.4f",this.bestPoint[j]);
+					best_point[j] = this.bestPoint[j];
+					
+				}
+				
+				//Formatting of the following outputs
+				else {
+					System.out.print(", ");
+					System.out.printf("%.4f",this.bestPoint[j]);
+					best_point[j] = this.bestPoint[j];
+					
+				}
+				
+				//Calculation of the next best point 
+				this.bestPoint[j] = this.bestPoint[j] + getStepSize() * direction_array[j];
+				
+			}
+
+			System.out.print("\n");
+			
+			//To limit the number of NaN on output, break out of loop of the norm is equal to NaN
+			if (Double.isNaN(norm) ) {
+				System.out.print("\n");	
+				return;
+			}
+				
+			} 
+		
+		//Setting the best point
+		setBestPoint(best_point);
+		System.out.print("\n");	
+		}
+	
+	// find the next step size
+	public double lineSearch () {
+		return getStepSize ();
+	}
+	
+	// find the next direction
+	public double [] direction ( Polynomial P , double [] x ) {
+		double arr[] = new double[0];
+		
+		arr = P.gradient(x);
+		
+		return arr;
+	}
+	
+	// Get steepest descent parameters from user 
+	public void getParamsUser ( int n ) {
+		
+		//If no polynomial has been recorded, exit function
+		if (n == 0) {
+			System.out.print("\n"
+					+ "ERROR: Polynomial function has not been entered!\n"
+					+ "\n");
+			return;
+		}
+		
+		
+		double ep = 0.00;
+		
+		System.out.print("\n");
+		
+		ep = Pro3_vedrines.getDouble("Enter tolerance epsilon (0 to cancel): ", 0.00, Double.MAX_VALUE);
+		//If 0 is entered, inputting process cancelled -> function is exited 
+		if (ep == 0.00) {
+			System.out.println("\n"+"Process canceled. No changes made to algorithm parameters."+"\n");
+		}
+		
+		//Otherwise proceed 
+		else {
+			//Set previously inputed epsilon
+			setEps(ep);
+			
+			//Inputing the nb of iterations
+			int mI = Pro3_vedrines.getInteger("Enter maximum number of iterations (0 to cancel): ", 0, 10000);
+			
+			//If 0 is entered, inputting process cancelled -> function is exited 
+			if (mI == 0) {
+				System.out.println("\n"+"Process canceled. No changes made to algorithm parameters."+"\n");
+			}
+			
+			//Otherwise proceed 
+			else {
+				//Set previously inputed max iterations
+				setMaxIter(mI);
+			
+				//Inputting the set size 
+				double ss = Pro3_vedrines.getDouble("Enter step size alpha (0 to cancel): ", 0, Double.MAX_VALUE);
+				
+				//If 0 is entered, inputting process cancelled -> function is exited 
+				if (ss == 0.00) {
+					System.out.println("\n"+"Process canceled. No changes made to algorithm parameters."+"\n");
+				}
+				
+				//Otherwise proceed 
+				else {
+					//Set previously inputed step size
+					setStepSize(ss);
+				
+					System.out.println("Enter values for starting point: ");
+					
+					//Giving a size to x0 by initializing with the nb of variables
+					init(n);
+					
+					//Formatting the input of starting points
+					for (int i = 0; i < n ; i++) {
+						int format_i = i+1;
+						setX0(i, Pro3_vedrines.getDouble( "   x" + format_i + ": ", -Double.MAX_VALUE, Double.MAX_VALUE));
+					}
+					
+					//Boolean setHasResults () to see if parameters for steepest descent are set -> helpful to have in the 
+					// print function to determine if there are user inputed parameters to display
+					setHasResults ( true);
+					System.out.println("\n" + "Algorithm parameters set!" + "\n");
+				}
+			}
+		}
+	}
+	
+		
+	// print algorithm parameters
+	public void print () {
+		//If no user inputed steepest descent parameters, use these predefined parameters for 1 variable
+		if (hasResults () == false) {
+			init(1);
+			setEps (0.001 );
+			setMaxIter ( 100 ) ;
+			setStepSize ( 0.05 );
+			setX0 (0 , 1.00 );
+		}
+		
+		//Print the predefined parameters if there are no user defined parameters 
+		System.out.println( "\n" + "Tolerance (epsilon): " + getEps ()+ "\n"
+				+ "Maximum iterations: " + getMaxIter ()+ "\n"
+				+ "Step size (alpha): " + getStepSize ());
+		
+		//Loop to print the starting point 
+		System.out.print("Starting point (x0): ( ");
+		for (int i = 0; i < getX0().length ; i++) {
+			if (i==0) {
+				System.out.printf("%.2f", getX0()[i]);
+			}
+			else {
+				System.out.printf(" , %.2f", getX0()[i]);
+			}	
+		}
+		System.out.print(" )" + "\n"+ "\n");
+	}
+	
+	// print iteration results , column header optional
+	public void printResults ( boolean rowOnly ) {
+		//If the run function hasn't been run then the number of iterations will be 0 so exit function
+		if (getNIter ()==0) {
+			System.out.print("\n"
+					+ "ERROR: No results exist!\n"
+					+ "\n");
+			return;
+		}
+		
+		//Print header
+		System.out.print("\n");
+		System.out.println("--------------------------------------------------------------\n"
+				+ "      f(x)   norm(grad)   # iter   Comp time (ms)   Best point   \n"
+				+ "--------------------------------------------------------------");
+		System.out.printf("%10.6f%13.6f%9d%17d",  getBestObjVal(), getBestGradNorm (), getNIter (), (int)getCompTime ());
+		
+		//Loop to print the best points
+		for (int j=0; j < getX0().length; j++ ) {
+			
+			if (j==0) {
+				System.out.print("   ");
+				System.out.printf("%.4f",getBestPoint()[j]);
+			}
+			
+			else {
+				System.out.print(", ");
+				System.out.printf("%.4f",getBestPoint()[j]);
+			}
+	
+		}
+		System.out.println("\n");
+	}
+}
+
+
+
